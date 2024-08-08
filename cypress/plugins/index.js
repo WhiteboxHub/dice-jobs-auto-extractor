@@ -1,7 +1,6 @@
 const fs = require('fs');
 const path = require('path');
 
-
 // Function to ensure directory existence
 const ensureDirectoryExistence = (filePath) => {
   const dirname = path.dirname(filePath);
@@ -21,6 +20,16 @@ const appendToFile = (filePath, message) => {
   }
 };
 
+// Function to get files from a directory
+const getFilesFromDirectory = (directory) => {
+  try {
+    return fs.readdirSync(directory).map(file => path.join(directory, file));
+  } catch (err) {
+    console.error('Error reading directory', err);
+    return [];
+  }
+};
+
 module.exports = (on, config) => {
   on('task', {
     ensureDirectoryExistence(filePath) {
@@ -30,7 +39,7 @@ module.exports = (on, config) => {
     writeJsonFile({ filePath, data }) {
       try {
         const jsonData = JSON.stringify(data, null, 2);
-        fs.writeFileSync(filePath, jsonData, 'utf8');
+        fs.writeFile(filePath, jsonData, 'utf8',(e)=>console.log(e));
         console.log('JSON file written successfully');
         return null;
       } catch (err) {
@@ -39,13 +48,13 @@ module.exports = (on, config) => {
       }
     },
     logInfo(message) {
-      const logPath = path.join(__dirname, '..', 'cypress', 'logs', 'info.log');
+      const logPath = path.join(__dirname, '..', 'logs', 'info.log');
       ensureDirectoryExistence(logPath);
       appendToFile(logPath, message);
       return null;
     },
     logError(message) {
-      const logPath = path.join(__dirname, '..', 'cypress', 'logs', 'error.log');
+      const logPath = path.join(__dirname, '..', 'logs', 'error.log');
       ensureDirectoryExistence(logPath);
       appendToFile(logPath, message);
       return null;

@@ -2,7 +2,7 @@ const cron = require('node-cron');
 const { exec } = require('child_process');
 
 // Schedule the job to run daily at 8:00 AM
-cron.schedule('0 16 * * *', () => {
+cron.schedule('0 0 * * 1-5', () => {
   console.log('Running Cypress tests...');
   
   // Execute Cypress tests
