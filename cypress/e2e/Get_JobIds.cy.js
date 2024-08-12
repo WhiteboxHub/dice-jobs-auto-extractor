@@ -9,7 +9,11 @@ const logFileName = `${format(new Date(), 'yyyy-MM-dd')}-Jobids.log`;
 
 // Helper function to ensure directory existence
 const ensureDirectoryExistence = (dir) => {
-  cy.task('ensureDirectoryExistence', dir);
+  cy.task('ensureDirectoryExistence', dir).then((errorMessage) => {
+    if (errorMessage) {
+      throw new Error(`Failed to ensure directory existence: ${errorMessage}`);
+    }
+  });
 };
 
 // Function to log messages to a file
@@ -39,7 +43,7 @@ describe('Dice Jobs Scraper', () => {
   Object.keys(keywords).forEach((category) => {
     keywords[category].forEach((keyword) => {
       const jobIdsFileName = `${format(new Date(), 'yyyy-MM-dd')}-${category}-${keyword.replace(/\s+/g, '_')}.json`;
-      const filePath = path.join(resultsDir, category, jobIdsFileName); // Fixed directory structure
+      const filePath = path.join(resultsDir, category, jobIdsFileName);
       const targetFilePath = path.join(targetFolder, category, jobIdsFileName);
       let jobIdSet = new Set();
 
@@ -95,7 +99,7 @@ describe('Dice Jobs Scraper', () => {
       
             const paths = {
               resultsPath: path.join(resultsDir, category, chunkFileName),
-              targetPath: path.join(targetFolder, chunkFileName),
+              targetPath: path.join(targetFolder, category, chunkFileName),
             };
       
             // Ensure category directories exist
