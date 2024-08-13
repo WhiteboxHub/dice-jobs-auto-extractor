@@ -1,5 +1,6 @@
 const fs = require('fs');
 const path = require('path');
+const os = require('os'); 
 
 // Function to ensure directory existence
 const ensureDirectoryExistence = (filePath) => {
@@ -35,6 +36,18 @@ module.exports = (on, config) => {
     ensureDirectoryExistence(filePath) {
       ensureDirectoryExistence(filePath);
       return null;
+    },
+    ensureDirectoryExistence(directoryPath) {
+      const fullPath = path.join(os.homedir(), directoryPath); // Construct full path
+      if (!fs.existsSync(fullPath)) {
+        try {
+          fs.mkdirSync(fullPath, { recursive: true });
+          return null; // No error
+        } catch (err) {
+          return err.message; // Return error message
+        }
+      }
+      return null; // Directory already exists, no error
     },
     writeJsonFile({ filePath, data }) {
       try {

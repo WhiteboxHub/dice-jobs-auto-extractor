@@ -1,11 +1,12 @@
 const path = require('path');
+const os = require('os');
 const { format } = require('date-fns');
 
-const resultsDir = 'cypress/fixtures/'; // Base directory for results
+// Directories
+const resultsDir = 'cypress/fixtures/';
 const logsDir = 'logs/';
-const targetFolder = path.join('C:/Users/YourUsername/Desktop/', 'dice-applications/jobs-to-apply/'); // Adjusted for desktop path
-
-const logFileName = `${format(new Date(), 'yyyy-MM-dd')}-Jobids.log`;
+const desktopPath = path.join(os.homedir(), 'Desktop');
+const targetFolder = path.join(desktopPath, 'jobs-to-apply');
 
 // Helper function to ensure directory existence
 const ensureDirectoryExistence = (dir) => {
@@ -18,8 +19,9 @@ const ensureDirectoryExistence = (dir) => {
 
 // Function to log messages to a file
 const logToFile = (message) => {
+  const logFileName = `${format(new Date(), 'yyyy-MM-dd')}-Jobids.log`;
   const logPath = path.join(logsDir, logFileName);
-  cy.task('logInfo', `${format(new Date(), 'yyyy-MM-dd ')} - ${message}`, { logPath });
+  cy.task('logInfo', `${format(new Date(), 'yyyy-MM-dd')} - ${message}`, { logPath });
 };
 
 // Function to split an array into chunks
@@ -97,32 +99,30 @@ describe('Dice Jobs Scraper', () => {
             const timestamp = format(new Date(), 'yyyy-MM-dd');
             const chunkFileName = `${timestamp}-${category}-${keyword.replace(/\s+/g, '_')}-chunk-${index + 1}.json`;
       
-            const paths = {
-              resultsPath: path.join(resultsDir, category, chunkFileName),
-              targetPath: path.join(targetFolder, category, chunkFileName),
-            };
+            const resultsPath = path.join(resultsDir, category, chunkFileName);
+            const targetPath = path.join(targetFolder, category, chunkFileName);
       
             // Ensure category directories exist
-            ensureDirectoryExistence(path.join(resultsDir, category));
-            ensureDirectoryExistence(path.join(targetFolder, category));
+            ensureDirectoryExistence(resultsPath);
+            ensureDirectoryExistence(targetPath);
       
             // Write to resultsPath
-            cy.task('writeJsonFile', { filePath: paths.resultsPath, data: { ids: chunk } })
+            cy.task('writeJsonFile', { filePath: resultsPath, data: { ids: chunk } })
               .then(result => {
                 if (result) {
                   cy.task('logError', `Error saving chunk ${index + 1} to resultsPath: ${result}`);
                 } else {
-                  cy.task('logInfo', `=== Job IDs chunk ${index + 1} saved to: ${paths.resultsPath} ===`);
+                  cy.task('logInfo', `=== Job IDs chunk ${index + 1} saved to: ${resultsPath} ===`);
                 }
               });
       
             // Write to targetPath
-            cy.task('writeJsonFile', { filePath: paths.targetPath, data: { ids: chunk } })
+            cy.task('writeJsonFile', { filePath: targetPath, data: { ids: chunk } })
               .then(result => {
                 if (result) {
                   cy.task('logError', `Error saving chunk ${index + 1} to targetPath: ${result}`);
                 } else {
-                  cy.task('logInfo', `=== Job IDs chunk ${index + 1} saved to: ${paths.targetPath} ===`);
+                  cy.task('logInfo', `=== Job IDs chunk ${index + 1} saved to: ${targetPath} ===`);
                 }
               });
           });
@@ -130,6 +130,7 @@ describe('Dice Jobs Scraper', () => {
           cy.task('logInfo', 'No job IDs collected to save.');
         }
       });
+      
     });
   });
 });

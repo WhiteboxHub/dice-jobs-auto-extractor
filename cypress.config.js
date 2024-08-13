@@ -5,14 +5,15 @@ module.exports = defineConfig({
     specPattern: 'cypress/e2e/**/*.cy.{js,jsx}',
     baseUrl: 'https://www.dice.com/',
     includeShadowDom: true,
-    pageLoadTimeout: 200000,
-    defaultCommandTimeout: 20000,
+    pageLoadTimeout: 100000,
+    defaultCommandTimeout: 10000,
     experimentalMemoryManagement: true,
     numTestsKeptInMemory: 1,
     chromeWebSecurity: false,
 
     // Environment variables for job scraping
     env: {
+    
       pageCount: 100,
       jobKeywords: {
         QA: [
