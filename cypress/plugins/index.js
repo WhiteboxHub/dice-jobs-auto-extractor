@@ -22,14 +22,7 @@ const appendToFile = (filePath, message) => {
 };
 
 // Function to get files from a directory
-const getFilesFromDirectory = (directory) => {
-  try {
-    return fs.readdirSync(directory).map(file => path.join(directory, file));
-  } catch (err) {
-    console.error('Error reading directory', err);
-    return [];
-  }
-};
+
 
 module.exports = (on, config) => {
   on('task', {
@@ -72,9 +65,7 @@ module.exports = (on, config) => {
       appendToFile(logPath, message);
       return null;
     },
-    getFilesFromDirectory(directory) {
-      return getFilesFromDirectory(directory);
-    },
+
   });
 
   return config;

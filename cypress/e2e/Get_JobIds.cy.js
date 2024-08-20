@@ -1,12 +1,9 @@
 const path = require('path');
-const os = require('os');
 const { format } = require('date-fns');
 
 // Directories
 const resultsDir = 'cypress/fixtures/';
 const logsDir = 'logs/';
-const desktopPath = path.join(os.homedir(), 'Desktop');
-const targetFolder = path.join(desktopPath, 'jobs-to-apply');
 
 // Helper function to ensure directory existence
 const ensureDirectoryExistence = (dir) => {
@@ -39,19 +36,16 @@ describe('Dice Jobs Scraper', () => {
   before(() => {
     ensureDirectoryExistence(resultsDir);
     ensureDirectoryExistence(logsDir);
-    ensureDirectoryExistence(targetFolder);
   });
 
   Object.keys(keywords).forEach((category) => {
     keywords[category].forEach((keyword) => {
       const jobIdsFileName = `${format(new Date(), 'yyyy-MM-dd')}-${category}-${keyword.replace(/\s+/g, '_')}.json`;
       const filePath = path.join(resultsDir, category, jobIdsFileName);
-      const targetFilePath = path.join(targetFolder, category, jobIdsFileName);
       let jobIdSet = new Set();
 
       beforeEach(() => {
         ensureDirectoryExistence(path.join(resultsDir, category));
-        ensureDirectoryExistence(path.join(targetFolder, category));
         logToFile(`=== Starting Dice Jobs Scraper Tests for category: "${category}", keyword: "${keyword}" ===\n`);
         jobIdSet = new Set();
       });
@@ -72,14 +66,15 @@ describe('Dice Jobs Scraper', () => {
                 }
               });
 
-              cy.get('li.pagination-next.page-item.ng-star-inserted').then(($nextPageItem) => {
-                if ($nextPageItem.hasClass('disabled')) {
-                  logToFile(`No more job cards found for keyword "${keyword}". Stopping. It's the last page.`);
-                } else {
-                  cy.get('li.pagination-next.page-item.ng-star-inserted a.page-link').click();
-                  cy.wait(1000).then(fetchJobsFromPage);
-                }
-              });
+              // Pagination logic here
+              // cy.get('li.pagination-next.page-item.ng-star-inserted').then(($nextPageItem) => {
+              //   if ($nextPageItem.hasClass('disabled')) {
+              //     logToFile(`No more job cards found for keyword "${keyword}". Stopping. It's the last page.`);
+              //   } else {
+              //     cy.get('li.pagination-next.page-item.ng-star-inserted a.page-link').click();
+              //     cy.wait(1000).then(fetchJobsFromPage);
+              //   }
+              // });
             };
 
             fetchJobsFromPage();
@@ -94,18 +89,16 @@ describe('Dice Jobs Scraper', () => {
         if (jobIds.length > 0) {
           const chunkSize = 20;
           const chunks = splitArrayIntoChunks(jobIds, chunkSize);
-      
+
           chunks.forEach((chunk, index) => {
             const timestamp = format(new Date(), 'yyyy-MM-dd');
             const chunkFileName = `${timestamp}-${category}-${keyword.replace(/\s+/g, '_')}-chunk-${index + 1}.json`;
-      
+
             const resultsPath = path.join(resultsDir, category, chunkFileName);
-            const targetPath = path.join(targetFolder, category, chunkFileName);
-      
+
             // Ensure category directories exist
             ensureDirectoryExistence(resultsPath);
-            ensureDirectoryExistence(targetPath);
-      
+
             // Write to resultsPath
             cy.task('writeJsonFile', { filePath: resultsPath, data: { ids: chunk } })
               .then(result => {
@@ -115,22 +108,11 @@ describe('Dice Jobs Scraper', () => {
                   cy.task('logInfo', `=== Job IDs chunk ${index + 1} saved to: ${resultsPath} ===`);
                 }
               });
-      
-            // Write to targetPath
-            cy.task('writeJsonFile', { filePath: targetPath, data: { ids: chunk } })
-              .then(result => {
-                if (result) {
-                  cy.task('logError', `Error saving chunk ${index + 1} to targetPath: ${result}`);
-                } else {
-                  cy.task('logInfo', `=== Job IDs chunk ${index + 1} saved to: ${targetPath} ===`);
-                }
-              });
           });
         } else {
           cy.task('logInfo', 'No job IDs collected to save.');
         }
       });
-      
     });
   });
 });

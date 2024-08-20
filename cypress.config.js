@@ -13,7 +13,7 @@ module.exports = defineConfig({
 
     // Environment variables for job scraping
     env: {
-    
+      
       pageCount: 100,
       jobKeywords: {
         QA: [
@@ -37,7 +37,7 @@ module.exports = defineConfig({
           'Data Science'
         ]
       },
-      targetFolder: 'c:/dice-applications/jobs-to-apply',
+     
     },
 
     setupNodeEvents(on, config) {
