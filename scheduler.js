@@ -4,7 +4,7 @@ const path = require('path');
 const fs = require('fs');
 
 // Schedule the job to run daily at 8:45 AM
-cron.schedule('45 8 * * *', () => {
+cron.schedule('45 15 * * *', () => {
   console.log('Running Cypress tests...');
 
   // Execute Cypress tests

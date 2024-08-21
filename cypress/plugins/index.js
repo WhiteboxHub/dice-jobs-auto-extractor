@@ -65,6 +65,33 @@ module.exports = (on, config) => {
       appendToFile(logPath, message);
       return null;
     },
+    sendEmail({ subject, body }) {
+      return new Promise((resolve, reject) => {
+        let transporter = nodemailer.createTransport({
+          service: 'gmail',
+          auth: {
+            user: '@gmail.com',
+            pass: ''
+          },
+        });
+
+        let mailOptions = {
+          from: '@gmail.com',
+          to: '@example.com',
+          subject: subject,
+          text: body,
+        };
+
+        transporter.sendMail(mailOptions, (error, info) => {
+          if (error) {
+            console.log(error);
+            return reject(error);
+          }
+          console.log('Email sent: ' + info.response);
+          resolve(info.response);
+        });
+      });
+    },
 
   });
 

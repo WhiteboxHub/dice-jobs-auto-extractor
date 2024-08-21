@@ -32,6 +32,7 @@ const splitArrayIntoChunks = (array, chunkSize) => {
 
 describe('Dice Jobs Scraper', () => {
   const keywords = Cypress.env('jobKeywords');
+  let keywordJobCounts = {};
 
   before(() => {
     ensureDirectoryExistence(resultsDir);
@@ -66,15 +67,15 @@ describe('Dice Jobs Scraper', () => {
                 }
               });
 
-              // Pagination logic here
-              // cy.get('li.pagination-next.page-item.ng-star-inserted').then(($nextPageItem) => {
-              //   if ($nextPageItem.hasClass('disabled')) {
-              //     logToFile(`No more job cards found for keyword "${keyword}". Stopping. It's the last page.`);
-              //   } else {
-              //     cy.get('li.pagination-next.page-item.ng-star-inserted a.page-link').click();
-              //     cy.wait(1000).then(fetchJobsFromPage);
-              //   }
-              // });
+             // Pagination logic here
+              cy.get('li.pagination-next.page-item.ng-star-inserted').then(($nextPageItem) => {
+                if ($nextPageItem.hasClass('disabled')) {
+                  logToFile(`No more job cards found for keyword "${keyword}". Stopping. It's the last page.`);
+                } else {
+                  cy.get('li.pagination-next.page-item.ng-star-inserted a.page-link').click();
+                  cy.wait(1000).then(fetchJobsFromPage);
+                }
+              });
             };
 
             fetchJobsFromPage();
@@ -86,6 +87,8 @@ describe('Dice Jobs Scraper', () => {
 
       afterEach(() => {
         const jobIds = Array.from(jobIdSet);
+        keywordJobCounts[keyword] = jobIds.length; // Store the count
+
         if (jobIds.length > 0) {
           const chunkSize = 20;
           const chunks = splitArrayIntoChunks(jobIds, chunkSize);
@@ -115,4 +118,31 @@ describe('Dice Jobs Scraper', () => {
       });
     });
   });
+
+  after(() => {
+    // After all tests, log the counts
+    Object.keys(keywordJobCounts).forEach(keyword => {
+      logToFile(`Keyword: ${keyword}, Job IDs fetched: ${keywordJobCounts[keyword]}`);
+    });
+
+    // Send an email with the counts
+    cy.task('sendEmail', {
+      subject: 'Daily Job Scraper Report',
+      body: generateEmailBody(keywordJobCounts),
+    }).then(result => {
+      if (result) {
+        cy.task('logError', `Error sending email: ${result}`);
+      } else {
+        cy.task('logInfo', `Email sent successfully.`);
+      }
+    });
+  });
 });
+
+function generateEmailBody(counts) {
+  let body = 'Job Scraper Results:\n\n';
+  Object.keys(counts).forEach(keyword => {
+    body += `Keyword: ${keyword}, Job IDs fetched: ${counts[keyword]}\n`;
+  });
+  return body;
+}
