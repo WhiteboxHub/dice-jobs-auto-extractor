@@ -1,4 +1,3 @@
-// scripts/runCypressAndCopy.js
 const cron = require('node-cron');
 const { exec } = require('child_process');
 const path = require('path');
@@ -20,7 +19,10 @@ cron.schedule('45 8 * * *', () => {
     }
     console.log(`Cypress stdout: ${stdout}`);
 
-    // After tests are complete, copy the fixtures
+    // Clean old JSON files before copying fixtures
+    cleanOldJsonFiles();
+
+    // After cleaning old files, copy the fixtures
     const srcDir = path.join(__dirname, '..', 'cypress', 'fixtures');
     const destDir = path.join(__dirname, 'backup', 'cypress-fixtures');
 
@@ -55,5 +57,47 @@ function copyDirectory(src, dest) {
       // Copy the file
       fs.copyFileSync(srcPath, destPath);
     }
+  });
+}
+
+function cleanOldJsonFiles() {
+  const directories = ['cypress/fixtures/ml', 'cypress/fixtures/qa', 'cypress/fixtures/ui'];
+  const days = 30;
+  const now = Date.now();
+  const cutoffTime = now - days * 24 * 60 * 60 * 1000;
+
+  directories.forEach((dir) => {
+    fs.readdir(dir, (err, files) => {
+      if (err) {
+        console.error(`Error reading directory ${dir}:`, err);
+        return;
+      }
+
+      files.forEach((file) => {
+        const filePath = path.join(dir, file);
+
+        // Check if the file has a .json extension
+        if (path.extname(file) === '.json') {
+          // Get the file stats to check its age
+          fs.stat(filePath, (err, stats) => {
+            if (err) {
+              console.error(`Error getting stats of file ${filePath}:`, err);
+              return;
+            }
+
+            // Delete if the file is older than 30 days
+            if (stats.mtime.getTime() < cutoffTime) {
+              fs.unlink(filePath, (err) => {
+                if (err) {
+                  console.error(`Error deleting file ${filePath}:`, err);
+                } else {
+                  console.log(`Deleted old JSON file: ${filePath}`);
+                }
+              });
+            }
+          });
+        }
+      });
+    });
   });
 }
