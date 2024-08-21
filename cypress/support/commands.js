@@ -54,9 +54,10 @@ Cypress.Commands.add('visitDiceJobsPage', ({ keyword, start, pageSize}) => {
     const url = `https://www.dice.com/jobs?q=${(keyword)}&page=${start}&pageSize=${pageSize}`;
     cy.log(url);
     cy.visit(url,{ failOnStatusCode: false });
-    cy.wait(3000);
+    cy.contains('button', 'Today').click();
+    cy.wait(5000);
     // Click the button with the text "Today"
-     cy.contains('button', 'Today').click();
+
   
 });
 
