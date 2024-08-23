@@ -64,14 +64,14 @@ module.exports = (on, config) => {
         let transporter = nodemailer.createTransport({
           service: 'gmail',
           auth: {
-            user: 'dicedetails1@gmail.com',
-            pass: 'hyqn gdee qoks erdq', // Ensure these credentials are kept secure
+            user: 'm',
+            pass: 'q', // Ensure these credentials are kept secure
           },
         });
     
         let mailOptions = {
-          from: 'dicedetails1@gmail.com',
-          to: 'shivapatel098k@gmail.com', // Replace with the correct recipient email address
+          from: 'dcom',
+          to: 'shil.com', // Replace with the correct recipient email address
           subject: subject,
           text: body,
         };
