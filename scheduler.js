@@ -1,97 +1,85 @@
 const { exec } = require('child_process');
-const fs = require('fs');
 const path = require('path');
+const fs = require('fs');
+const os = require('os');
 const schedule = require('node-schedule');
 
-// Define source and destination directories for file copying
-const sourceDir = path.join(__dirname, 'cypress', 'fixtures');
-const destDir = path.join(require('os').homedir(), 'Desktop', 'jobs_to_apply');
+// Define paths
+const fixturesPath = path.join(__dirname, 'cypress', 'fixtures');
+const desktopPath = path.join(os.homedir(), 'Desktop', 'jobs_to_apply');
 
-// Function to copy files
-const copyFiles = (source, destination) => {
-    if (!fs.existsSync(destination)) {
-        fs.mkdirSync(destination, { recursive: true });
+// Function to create directory if it doesn't exist
+const ensureDirectoryExists = dirPath => {
+    if (!fs.existsSync(dirPath)) {
+        fs.mkdirSync(dirPath, { recursive: true });
+        console.log(`Directory created at: ${dirPath}`);
+    } else {
+        console.log(`Directory already exists: ${dirPath}`);
     }
-
-    const files = fs.readdirSync(source);
-    files.forEach(file => {
-        const srcFile = path.join(source, file);
-        const destFile = path.join(destination, file);
-
-        fs.copyFileSync(srcFile, destFile);
-        console.log(`Copied ${file} to ${destination}`);
-    });
 };
 
-// Function to clean old JSON files
-const cleanOldJsonFiles = () => {
-    const directories = ['cypress/fixtures/ml', 'cypress/fixtures/qa', 'cypress/fixtures/ui'];
-    const days = 30;
-    const now = Date.now();
-    const cutoffTime = now - days * 24 * 60 * 60 * 1000;
+// Function to copy directory recursively
+const copyDirectory = (src, dest) => {
+    ensureDirectoryExists(dest);
 
-    directories.forEach((dir) => {
-        if (fs.existsSync(dir)) {
-            fs.readdir(dir, (err, files) => {
-                if (err) {
-                    console.error(`Error reading directory ${dir}:`, err);
-                    return;
-                }
+    fs.readdirSync(src).forEach(file => {
+        const srcPath = path.join(src, file);
+        const destPath = path.join(dest, file);
 
-                files.forEach((file) => {
-                    const filePath = path.join(dir, file);
-
-                    // Check if the file has a .json extension
-                    if (path.extname(file) === '.json') {
-                        // Get the file stats to check its age
-                        fs.stat(filePath, (err, stats) => {
-                            if (err) {
-                                console.error(`Error getting stats of file ${filePath}:`, err);
-                                return;
-                            }
-
-                            // Delete if the file is older than 30 days
-                            if (stats.mtime.getTime() < cutoffTime) {
-                                fs.unlink(filePath, (err) => {
-                                    if (err) {
-                                        console.error(`Error deleting file ${filePath}:`, err);
-                                    } else {
-                                        console.log(`Deleted old JSON file: ${filePath}`);
-                                    }
-                                });
-                            }
-                        });
-                    }
-                });
-            });
+        if (fs.lstatSync(srcPath).isDirectory()) {
+            copyDirectory(srcPath, destPath);
         } else {
-            console.error(`Directory does not exist: ${dir}`);
+            fs.copyFileSync(srcPath, destPath);
         }
     });
 };
 
-// Schedule task
-schedule.scheduleJob('59 16 * * *', () => {
+// Function to remove directory recursively
+const removeDirectory = dirPath => {
+    if (fs.existsSync(dirPath)) {
+        fs.readdirSync(dirPath).forEach(file => {
+            const curPath = path.join(dirPath, file);
+
+            if (fs.lstatSync(curPath).isDirectory()) {
+                removeDirectory(curPath);
+            } else {
+                fs.unlinkSync(curPath);
+            }
+        });
+
+        fs.rmdirSync(dirPath);
+    }
+};
+
+// Function to run Cypress tests
+const runCypressTests = () => {
     console.log('Running Cypress tests...');
 
-    // Execute Cypress tests
     exec('npx cypress run', (error, stdout, stderr) => {
         if (error) {
-            console.error(`Error executing Cypress tests: ${error}`);
+            console.error(`Error running Cypress: ${error.message}`);
             return;
         }
-        if (stderr) {
-            console.error(`Cypress stderr: ${stderr}`);
-            return;
-        }
+        // if (stderr) {
+        //     console.error(`Cypress stderr: ${stderr}`);
+        //     return;
+        // }
+
         console.log(`Cypress stdout: ${stdout}`);
 
-        // Copy files after running Cypress tests
-        console.log('Copying files...');
-        copyFiles(sourceDir, destDir);
-
-        // Clean old JSON files after copying
-        console.log('Cleaning old JSON files...');
-        cleanOldJsonFiles();
+        // Copy the fixtures folder to the desktop
+        console.log('Copying fixtures folder to desktop...');
+        copyDirectory(fixturesPath, desktopPath);
+        console.log('Fixtures copied to desktop.');
     });
-});
+};
+
+// Schedule the Cypress test to run at 6 PM, Monday to Friday
+schedule.scheduleJob('47 9 * * 1-5', runCypressTests);
+
+// // Schedule deletion of the folder after 30 days
+// schedule.scheduleJob('0 0 0 */30 * *', () => {
+//     console.log('Deleting jobs_to_apply folder from desktop...');
+//     removeDirectory(desktopPath);
+//     console.log('Folder deleted successfully.');
+// });
