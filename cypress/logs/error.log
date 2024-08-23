@@ -344,3 +344,17 @@ Error saving chunk 2 to targetPath: ENOENT: no such file or directory, mkdir '/D
 Error saving chunk 3 to targetPath: ENOENT: no such file or directory, mkdir '/Desktop/jobs-to-apply/QA'
 Error saving chunk 4 to targetPath: ENOENT: no such file or directory, mkdir '/Desktop/jobs-to-apply/QA'
 Error saving chunk 5 to targetPath: ENOENT: no such file or directory, mkdir '/Desktop/jobs-to-apply/QA'
+Error sending email: 250 2.0.0 OK  1724359386 d2e1a72fcca58-7143425109asm1791393b3a.67 - gsmtp
+Error sending email: 250 2.0.0 OK  1724360959 41be03b00d2f7-7cd9ad81c00sm1778786a12.93 - gsmtp
+Error sending email: 250 2.0.0 OK  1724361240 d2e1a72fcca58-7143433ac53sm1799250b3a.212 - gsmtp
+Error sending email: 250 2.0.0 OK  1724361604 d9443c01a7336-20385564d82sm16835035ad.45 - gsmtp
+Error sending email: 250 2.0.0 OK  1724361962 d2e1a72fcca58-714348d849asm1766787b3a.44 - gsmtp
+Error sending email: 250 2.0.0 OK  1724362496 d9443c01a7336-2038556659dsm16923455ad.59 - gsmtp
+Error sending email: 250 2.0.0 OK  1724362974 d2e1a72fcca58-714342e2194sm1824667b3a.126 - gsmtp
+Error sending email: 250 2.0.0 OK  1724363808 d2e1a72fcca58-71434231147sm1840997b3a.34 - gsmtp
+Error sending email: 250 2.0.0 OK  1724365106 d9443c01a7336-2038560fbe9sm17136455ad.227 - gsmtp
+Error sending email: 250 2.0.0 OK  1724365460 98e67ed59e1d1-2d5ebbb1726sm4732798a91.37 - gsmtp
+Error sending email: 250 2.0.0 OK  1724366145 41be03b00d2f7-7cd9ac98152sm1630331a12.3 - gsmtp
+Error sending email: 250 2.0.0 OK  1724366836 98e67ed59e1d1-2d613af0f80sm2433224a91.39 - gsmtp
+Error sending email: 250 2.0.0 OK  1724368034 98e67ed59e1d1-2d613af1884sm2458147a91.43 - gsmtp
+Error sending email: 250 2.0.0 OK  1724371353 d9443c01a7336-2038560fa4asm17854525ad.213 - gsmtp
