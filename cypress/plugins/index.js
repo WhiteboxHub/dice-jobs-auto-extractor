@@ -2,7 +2,7 @@ const fs = require('fs');
 const path = require('path');
 const os = require('os');
 const nodemailer = require('nodemailer'); // Ensure nodemailer is imported
-
+require('dotenv').config(); 
 // Function to ensure directory existence
 const ensureDirectoryExistence = (filePath) => {
   const dirname = path.dirname(filePath);
@@ -64,14 +64,14 @@ module.exports = (on, config) => {
         let transporter = nodemailer.createTransport({
           service: 'gmail',
           auth: {
-            user: 'm',
-            pass: 'q', // Ensure these credentials are kept secure
+            user: process.env.EMAIL_USER, // Use environment variable for email user
+             pass: process.env.EMAIL_PASS, // Use environment variable for email password // Ensure these credentials are kept secure
           },
         });
     
         let mailOptions = {
-          from: 'dcom',
-          to: 'shil.com', // Replace with the correct recipient email address
+          from: process.env.EMAIL_USER, // Use environment variable for sender email
+          to: process.env.EMAIL_TO, // Replace with the correct recipient email address
           subject: subject,
           text: body,
         };

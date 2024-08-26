@@ -58,7 +58,7 @@ const runCypressTests = () => {
     exec('npx cypress run', (error, stdout, stderr) => {
         if (error) {
             console.error(`Error running Cypress: ${error.message}`);
-            return;
+            //return;
         }
         // if (stderr) {
         //     console.error(`Cypress stderr: ${stderr}`);
@@ -75,11 +75,11 @@ const runCypressTests = () => {
 };
 
 // Schedule the Cypress test to run at 6 PM, Monday to Friday
-schedule.scheduleJob('47 9 * * 1-5', runCypressTests);
+schedule.scheduleJob('30 17 * * 1-5', runCypressTests);
 
-// // Schedule deletion of the folder after 30 days
-// schedule.scheduleJob('0 0 0 */30 * *', () => {
-//     console.log('Deleting jobs_to_apply folder from desktop...');
-//     removeDirectory(desktopPath);
-//     console.log('Folder deleted successfully.');
-// });
+// Schedule deletion of the folder after 30 days
+schedule.scheduleJob('0 0 0 */30 * *', () => {
+    console.log('Deleting jobs_to_apply folder from desktop...');
+    removeDirectory(desktopPath);
+    console.log('Folder deleted successfully.');
+});

@@ -19,6 +19,7 @@
   },
   "dependencies": {
     "date-fns": "^3.6.0",
+    "dotenv": "^16.4.5",
     "json2csv": "^6.0.0-alpha.2",
     "node-cron": "^3.0.3",
     "node-schedule": "^2.1.1",

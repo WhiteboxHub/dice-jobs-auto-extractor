@@ -65,15 +65,15 @@ describe('Dice Jobs Scraper', () => {
                   }
                 });
   
-              //  // Pagination logic here
-              //   cy.get('li.pagination-next.page-item.ng-star-inserted').then(($nextPageItem) => {
-              //     if ($nextPageItem.hasClass('disabled')) {
-              //       logToFile(`No more job cards found for keyword "${keyword}". Stopping. It's the last page.`);
-              //     } else {
-              //       cy.get('li.pagination-next.page-item.ng-star-inserted a.page-link').click();
-              //       cy.wait(1000).then(fetchJobsFromPage);
-              //     }
-              //   });
+               // Pagination logic here
+                // cy.get('li.pagination-next.page-item.ng-star-inserted').then(($nextPageItem) => {
+                //   if ($nextPageItem.hasClass('disabled')) {
+                //     logToFile(`No more job cards found for keyword "${keyword}". Stopping. It's the last page.`);
+                //   } else {
+                //     cy.get('li.pagination-next.page-item.ng-star-inserted a.page-link').click();
+                //     cy.wait(1000).then(fetchJobsFromPage);
+                //   }
+                // });
               };
   
               fetchJobsFromPage();
