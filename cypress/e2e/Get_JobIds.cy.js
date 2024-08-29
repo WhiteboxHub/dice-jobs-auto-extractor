@@ -31,7 +31,7 @@ const splitArrayIntoChunks = (array, chunkSize) => {
 };
 
 describe('Dice Jobs Scraper', () => {
-  const keywords = Cypress.env('jobKeywords');
+  const keywordsByCategory = Cypress.env('jobKeywords');
   const keywordJobCounts = {}; // Object to store job counts for each keyword
 
   before(() => {
@@ -39,17 +39,17 @@ describe('Dice Jobs Scraper', () => {
     ensureDirectoryExistence(logsDir);
   });
 
-  Object.keys(keywords).forEach((category) => {
-    keywords[category].forEach((keyword) => {
-      describe(`Fetching jobs for "${keyword}" in category "${category}"`, () => {
-        let jobIdSet = new Set();
+  Object.keys(keywordsByCategory).forEach((category) => {
+    let jobIdSet = new Set();
 
-        before(() => {
-          logToFile(`=== Starting Dice Jobs Scraper Tests for category: "${category}", keyword: "${keyword}" ===\n`);
-          jobIdSet = new Set(); // Initialize the set for each keyword
-        });
+    describe(`Fetching jobs for category "${category}"`, () => {
 
-        it(`should fetch jobs for "${keyword}"`, function () {
+      before(() => {
+        logToFile(`=== Starting Dice Jobs Scraper Tests for category: "${category}" ===\n`);
+      });
+
+      keywordsByCategory[category].forEach((keyword) => {
+        it(`should fetch jobs for keyword "${keyword}" in category "${category}"`, function () {
           logToFile(`Fetching jobs for keyword: "${keyword}"`);
           const pageSize = Cypress.env('pageCount');
           const startPage = 1;
@@ -61,11 +61,11 @@ describe('Dice Jobs Scraper', () => {
                   const jobId = $el.attr('id');
                   if (jobId) {
                     jobIdSet.add(jobId);
-                    logToFile(`Job ID ${jobId} added to set for keyword "${keyword}"`);
+                    logToFile(`Job ID ${jobId} added to set for keyword "${keyword}" in category "${category}"`);
                   }
                 });
   
-              // Pagination logic here
+                // Pagination logic
                 cy.get('li.pagination-next.page-item.ng-star-inserted').then(($nextPageItem) => {
                   if ($nextPageItem.hasClass('disabled')) {
                     logToFile(`No more job cards found for keyword "${keyword}". Stopping. It's the last page.`);
@@ -82,41 +82,41 @@ describe('Dice Jobs Scraper', () => {
   
           performSearch();
         });
+      });
 
-        after(() => {
-          const jobIds = Array.from(jobIdSet);
-          const jobIdCount = jobIds.length;
-          keywordJobCounts[keyword] = jobIdCount; // Store the count for each keyword
+      after(() => {
+        const jobIds = Array.from(jobIdSet);
+        const jobIdCount = jobIds.length;
+        keywordJobCounts[category] = jobIdCount; // Store the count for the category
 
-          logToFile(`Keyword: ${keyword}, Job IDs fetched: ${jobIdCount}`);
+        logToFile(`Category: ${category}, Job IDs fetched: ${jobIdCount}`);
 
-          if (jobIdCount > 0) {
-            const chunkSize = 20;
-            const chunks = splitArrayIntoChunks(jobIds, chunkSize);
+        if (jobIdCount > 0) {
+          const chunkSize = 20;
+          const chunks = splitArrayIntoChunks(jobIds, chunkSize);
 
-            chunks.forEach((chunk, index) => {
-              const timestamp = format(new Date(), 'yyyy-MM-dd');
-              const chunkFileName = `${timestamp}-${category}-${keyword.replace(/\s+/g, '_')}-chunk-${index + 1}.json`;
+          chunks.forEach((chunk, index) => {
+            const timestamp = format(new Date(), 'yyyy-MM-dd');
+            const chunkFileName = `${timestamp}-${category.replace(/\s+/g, '_')}-chunk-${index + 1}.json`;
 
-              const resultsPath = path.join(resultsDir, category, chunkFileName);
+            const resultsPath = path.join(resultsDir, category, chunkFileName);
 
-              // Ensure category directories exist
-              ensureDirectoryExistence(resultsPath);
+            // Ensure category directories exist
+            ensureDirectoryExistence(path.dirname(resultsPath));
 
-              // Write to resultsPath
-              cy.task('writeJsonFile', { filePath: resultsPath, data: { ids: chunk } })
-                .then(result => {
-                  if (result) {
-                    cy.task('logError', `Error saving chunk ${index + 1} to resultsPath: ${result}`);
-                  } else {
-                    cy.task('logInfo', `=== Job IDs chunk ${index + 1} saved to: ${resultsPath} ===`);
-                  }
-                });
-            });
-          } else {
-            cy.task('logInfo', `No job IDs collected for keyword "${keyword}".`);
-          }
-        });
+            // Write to resultsPath
+            cy.task('writeJsonFile', { filePath: resultsPath, data: { ids: chunk } })
+              .then(result => {
+                if (result) {
+                  cy.task('logError', `Error saving chunk ${index + 1} to resultsPath: ${result}`);
+                } else {
+                  cy.task('logInfo', `=== Job IDs chunk ${index + 1} saved to: ${resultsPath} ===`);
+                }
+              });
+          });
+        } else {
+          cy.task('logInfo', `No job IDs collected for category "${category}".`);
+        }
       });
     });
   });
@@ -124,7 +124,7 @@ describe('Dice Jobs Scraper', () => {
   after(() => {
     logToFile('Dice Jobs Scraper Tests completed.');
 
-    // Generate the email body with counts for all keywords
+    // Generate the email body with counts for all categories
     const emailBody = generateEmailBody(keywordJobCounts);
     cy.task('sendEmail', {
       subject: 'Daily Job Scraper Report',
@@ -141,8 +141,8 @@ describe('Dice Jobs Scraper', () => {
 
 function generateEmailBody(keywordJobCounts) {
   let body = 'Job Scraper Results:\n\n';
-  Object.keys(keywordJobCounts).forEach(keyword => {
-    body += `Keyword: ${keyword}, Job IDs fetched: ${keywordJobCounts[keyword]}\n`;
+  Object.keys(keywordJobCounts).forEach(category => {
+    body += `Category: ${category}, Job IDs fetched: ${keywordJobCounts[category]}\n`;
   });
   return body;
 }

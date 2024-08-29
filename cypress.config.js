@@ -21,8 +21,9 @@ module.exports = defineConfig({
           'Appium',
           'JMeter',
           'Cypress',
-          'Postman',
-          'Quality Engineer'
+         'RESTAssured',
+         'Playwright',
+         'Puppeteer'
         ],
         UI: [
           'Frontend Engineer',
@@ -34,7 +35,13 @@ module.exports = defineConfig({
         ],
         ML: [
           'Machine Learning',
-          'Data Science'
+            'MLops',
+            'MLFlow',
+            'Bedrock',
+          'HuggingFace',
+          'Keras',
+        'scikit-learn',
+        'MLLib'
         ]
       },
      

@@ -75,7 +75,7 @@ const runCypressTests = () => {
 };
 
 // Schedule the Cypress test to run at 6 PM, Monday to Friday
-schedule.scheduleJob('30 17 * * 1-5', runCypressTests);
+schedule.scheduleJob('01 18 * * 1-5', runCypressTests);
 
 // Schedule deletion of the folder after 30 days
 schedule.scheduleJob('0 0 0 */30 * *', () => {
