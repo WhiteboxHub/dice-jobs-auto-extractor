@@ -48,7 +48,19 @@ const removeDirectory = dirPath => {
         });
 
         fs.rmdirSync(dirPath);
+        console.log(`Directory removed: ${dirPath}`);
     }
+};
+
+// Function to recreate specific directories
+const recreateDirectories = () => {
+    const mlPath = path.join(fixturesPath, 'ML');
+    const qaPath = path.join(fixturesPath, 'QA');
+    const uiPath = path.join(fixturesPath, 'UI');
+
+    ensureDirectoryExists(mlPath);
+    ensureDirectoryExists(qaPath);
+    ensureDirectoryExists(uiPath);
 };
 
 // Function to run Cypress tests
@@ -58,12 +70,8 @@ const runCypressTests = () => {
     exec('npx cypress run', (error, stdout, stderr) => {
         if (error) {
             console.error(`Error running Cypress: ${error.message}`);
-            //return;
+            return;
         }
-        // if (stderr) {
-        //     console.error(`Cypress stderr: ${stderr}`);
-        //     return;
-        // }
 
         console.log(`Cypress stdout: ${stdout}`);
 
@@ -75,11 +83,15 @@ const runCypressTests = () => {
 };
 
 // Schedule the Cypress test to run at 6 PM, Monday to Friday
-schedule.scheduleJob('01 18 * * 1-5', runCypressTests);
+schedule.scheduleJob('01 6 * * 1-5', runCypressTests);
 
-// Schedule deletion of the folder after 30 days
-schedule.scheduleJob('0 0 0 */30 * *', () => {
+// Schedule deletion of the folder every 2 days and recreate specific directories
+schedule.scheduleJob('0 0 0 */2 * *', () => {
     console.log('Deleting jobs_to_apply folder from desktop...');
     removeDirectory(desktopPath);
     console.log('Folder deleted successfully.');
+
+    console.log('Recreating specific directories in fixtures...');
+    recreateDirectories();
+    console.log('Directories recreated successfully.');
 });
