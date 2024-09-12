@@ -51,7 +51,7 @@
 
 Cypress.Commands.add('visitDiceJobsPage', ({ keyword, start, pageSize}) => {
     
-    const url = `https://www.dice.com/jobs?q=${(keyword)}&page=${start}&pageSize=${pageSize}&filters.postedDate=ONE`;
+    const url = `https://www.dice.com/jobs?q=${(keyword)}&page=${start}&pageSize=${pageSize}&filters.postedDate=ONE&filters.easyApply=true`;
     cy.log(url);
     cy.visit(url,{ failOnStatusCode: false });
   //  cy.contains('button', 'Today').click();

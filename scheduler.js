@@ -69,7 +69,7 @@ const runCypressTests = () => {
 
     exec('npx cypress run', (error, stdout, stderr) => {
         if (error) {
-          //  console.error(`Error running Cypress: ${error.message}`);
+            console.error(`Error running Cypress: ${error.message}`);
           //  return;
         }
 
@@ -83,7 +83,7 @@ const runCypressTests = () => {
 };
 
 // Schedule the Cypress test to run at 6 PM, Monday to Friday
-schedule.scheduleJob('35 9 * * *', runCypressTests);
+schedule.scheduleJob('02 9 * * *', runCypressTests);
 
 // Schedule deletion of the folder every 2 days and recreate specific directories
 schedule.scheduleJob('0 0 0 */2 * *', () => {
