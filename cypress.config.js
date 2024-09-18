@@ -34,14 +34,17 @@ module.exports = defineConfig({
           'Express.js'
         ],
         ML: [
-          'Machine Learning',
-            'MLops',
-            'MLFlow',
-            'Bedrock',
-          'HuggingFace',
-          'Keras',
-        'scikit-learn',
-        'MLLib'
+       'Machine Learning',
+'MLops',
+'MLFlow',
+'Generative ai',
+'neural networks',
+'Spark with ML',
+'NLP',
+'HuggingFace',
+'tensorflow',
+'Pytorch',
+'Keras'
         ]
       },
      
