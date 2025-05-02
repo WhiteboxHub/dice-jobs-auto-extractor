@@ -136,7 +136,7 @@ const moveFiles = async (src, dest) => {
 };
 
 // Schedule the Cypress test to run at 6 PM, Monday to Friday
-schedule.scheduleJob('31 14 * * *', runCypressTests);
+schedule.scheduleJob('49 13 * * *', runCypressTests);
 
 // Schedule moving files from the jobs_to_apply folder to the archived_jobs folder every two days at 6 PM
 schedule.scheduleJob('40 13 * * *', async () => {
