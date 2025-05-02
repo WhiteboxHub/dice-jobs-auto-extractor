@@ -77,7 +77,7 @@ describe('Dice Jobs Scraper', () => {
                       nextButton.attr('data-disabled') !== 'true') {
                     
                     cy.log('Next page exists. Waiting 50 seconds before proceeding...');
-                    cy.wait(15000); // 50 seconds wait
+                    cy.wait(0000); // 50 seconds wait
                     
                     cy.wrap(nextButton).click({ force: true });
                     cy.wait(1000);

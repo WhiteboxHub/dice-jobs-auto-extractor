@@ -57,18 +57,15 @@ describe('Dice Jobs Scraper', () => {
           const performSearch = () => {
             cy.visitDiceJobsPage({ keyword, start: startPage, pageSize }).then(() => {
               const fetchJobsFromPage = () => {
-                // Extract URL IDs from job links instead of div IDs
-                cy.get('[data-testid="job-search-job-card-link"]').each(($el) => {
-                  const href = $el.attr('href');
-                  const jobId = href.split('/').pop(); // Extracts the UUID from URL
-                  
+                cy.get('div.bg-surface-primary.border-zinc-100.rounded-lg.p-6').each(($el) => {
+                  const jobId = $el.attr('id');
                   if (jobId) {
                     jobIdSet.add(jobId);
-                    logToFile(`URL ID ${jobId} added to set for keyword "${keyword}" in category "${category}"`);
+                    logToFile(`Job ID ${jobId} added to set for keyword "${keyword}" in category "${category}"`);
                   }
                 });
-          
-                // Pagination logic (unchanged)
+  
+                // Pagination logic
                 cy.get('nav[aria-label="Pagination"]').then(($nav) => {
                   const nextButton = $nav.find('[aria-label="Next"]');
                   
@@ -77,18 +74,20 @@ describe('Dice Jobs Scraper', () => {
                       nextButton.attr('data-disabled') !== 'true') {
                     
                     cy.log('Next page exists. Waiting 50 seconds before proceeding...');
-                    cy.wait(15000); // 50 seconds wait
+                    cy.wait(50000); // 50 seconds wait
                     
+                    // Click with error handling using Cypress' built-in mechanisms
                     cy.wrap(nextButton).click({ force: true });
                     cy.wait(1000);
                     
+                    // This will automatically fail the test if the click fails
                     fetchJobsFromPage();
                   } else {
                     logToFile(`No more pages available for keyword "${keyword}". Stopping.`);
                   }
                 });
               };
-          
+  
               fetchJobsFromPage();
             });
           };

@@ -57,38 +57,25 @@ describe('Dice Jobs Scraper', () => {
           const performSearch = () => {
             cy.visitDiceJobsPage({ keyword, start: startPage, pageSize }).then(() => {
               const fetchJobsFromPage = () => {
-                // Extract URL IDs from job links instead of div IDs
-                cy.get('[data-testid="job-search-job-card-link"]').each(($el) => {
-                  const href = $el.attr('href');
-                  const jobId = href.split('/').pop(); // Extracts the UUID from URL
-                  
+                cy.get('.card-title-link.normal').each(($el) => {
+                  const jobId = $el.attr('id');
                   if (jobId) {
                     jobIdSet.add(jobId);
-                    logToFile(`URL ID ${jobId} added to set for keyword "${keyword}" in category "${category}"`);
+                    logToFile(`Job ID ${jobId} added to set for keyword "${keyword}" in category "${category}"`);
                   }
                 });
-          
-                // Pagination logic (unchanged)
-                cy.get('nav[aria-label="Pagination"]').then(($nav) => {
-                  const nextButton = $nav.find('[aria-label="Next"]');
-                  
-                  if (nextButton.length && 
-                      nextButton.attr('aria-disabled') !== 'true' && 
-                      nextButton.attr('data-disabled') !== 'true') {
-                    
-                    cy.log('Next page exists. Waiting 50 seconds before proceeding...');
-                    cy.wait(15000); // 50 seconds wait
-                    
-                    cy.wrap(nextButton).click({ force: true });
-                    cy.wait(1000);
-                    
-                    fetchJobsFromPage();
+  
+                // Pagination logic
+                cy.get('li.pagination-next.page-item.ng-star-inserted').then(($nextPageItem) => {
+                  if ($nextPageItem.hasClass('disabled')) {
+                    logToFile(`No more job cards found for keyword "${keyword}". Stopping. It's the last page.`);
                   } else {
-                    logToFile(`No more pages available for keyword "${keyword}". Stopping.`);
+                    cy.get('li.pagination-next.page-item.ng-star-inserted a.page-link').click();
+                    cy.wait(1000).then(fetchJobsFromPage);
                   }
                 });
               };
-          
+  
               fetchJobsFromPage();
             });
           };

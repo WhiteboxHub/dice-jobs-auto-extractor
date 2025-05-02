@@ -57,38 +57,41 @@ describe('Dice Jobs Scraper', () => {
           const performSearch = () => {
             cy.visitDiceJobsPage({ keyword, start: startPage, pageSize }).then(() => {
               const fetchJobsFromPage = () => {
-                // Extract URL IDs from job links instead of div IDs
-                cy.get('[data-testid="job-search-job-card-link"]').each(($el) => {
-                  const href = $el.attr('href');
-                  const jobId = href.split('/').pop(); // Extracts the UUID from URL
-                  
+                cy.get('div.bg-surface-primary.border-zinc-100.rounded-lg.p-6').each(($el) => {
+                  const jobId = $el.attr('id');
                   if (jobId) {
                     jobIdSet.add(jobId);
-                    logToFile(`URL ID ${jobId} added to set for keyword "${keyword}" in category "${category}"`);
+                    logToFile(`Job ID ${jobId} added to set for keyword "${keyword}" in category "${category}"`);
                   }
                 });
-          
-                // Pagination logic (unchanged)
+  
+                // Pagination logic
                 cy.get('nav[aria-label="Pagination"]').then(($nav) => {
-                  const nextButton = $nav.find('[aria-label="Next"]');
-                  
-                  if (nextButton.length && 
-                      nextButton.attr('aria-disabled') !== 'true' && 
-                      nextButton.attr('data-disabled') !== 'true') {
-                    
-                    cy.log('Next page exists. Waiting 50 seconds before proceeding...');
-                    cy.wait(15000); // 50 seconds wait
-                    
-                    cy.wrap(nextButton).click({ force: true });
-                    cy.wait(1000);
-                    
-                    fetchJobsFromPage();
-                  } else {
-                    logToFile(`No more pages available for keyword "${keyword}". Stopping.`);
-                  }
-                });
+  const nextButton = $nav.find('[aria-label="Next"]');
+  
+  if (nextButton.length && 
+      nextButton.attr('aria-disabled') !== 'true' && 
+      nextButton.attr('data-disabled') !== 'true') {
+    
+    // Wait 50 seconds before clicking next page
+    cy.log('Next page exists. Waiting 50 seconds before proceeding...');
+    cy.wait(50000); // 50,000ms = 50 seconds
+    
+    cy.wrap(nextButton).click({ force: true })
+      .then(() => {
+        cy.wait(1000); // Additional 1s wait after click
+        fetchJobsFromPage();
+      })
+      .catch((err) => {
+        logToFile(`Error clicking next page: ${err.message}`);
+        throw err;
+      });
+  } else {
+    logToFile(`No more pages available for keyword "${keyword}". Stopping.`);
+  }
+});
               };
-          
+  
               fetchJobsFromPage();
             });
           };
